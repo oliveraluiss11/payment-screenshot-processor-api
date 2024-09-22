@@ -54,7 +54,13 @@
 			<artifactId>tess4j</artifactId>
 			<version>5.7.0</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.13.0</version> <!-- O la versión más reciente -->
+        </dependency>
+
+    </dependencies>
 
 	<build>
 		<plugins>
