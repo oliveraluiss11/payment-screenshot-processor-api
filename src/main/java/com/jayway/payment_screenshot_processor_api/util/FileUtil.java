@@ -4,10 +4,10 @@ import com.jayway.payment_screenshot_processor_api.exception.GenericClientExcept
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Objects;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class FileUtil {
     public static InputStream convertMultiPartToInputStream(MultipartFile file) {
