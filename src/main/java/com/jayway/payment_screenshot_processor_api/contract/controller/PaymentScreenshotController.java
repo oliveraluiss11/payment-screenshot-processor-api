@@ -1,6 +1,5 @@
 package com.jayway.payment_screenshot_processor_api.contract.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.payment_screenshot_processor_api.contract.dto.ErrorDTO;
 import com.jayway.payment_screenshot_processor_api.contract.dto.PaymentScreenshotProcessor;
 import com.jayway.payment_screenshot_processor_api.contract.dto.request.GetPaymentScreenshotRequest;
@@ -27,7 +26,7 @@ public class PaymentScreenshotController {
     @PostMapping("/screenshots")
     public ResponseEntity<PaymentScreenshotResponse> processingScreenshot(@RequestParam("file") MultipartFile file,
                                                                           @RequestParam("documentNumber") String documentNumber,
-                                                                          @RequestHeader("api-key") String apiKey) throws JsonProcessingException {
+                                                                          @RequestHeader("api-key") String apiKey) {
         return ResponseEntity.status(HttpStatus.OK).body(paymentScreenshotService.screenshotProcessor(file, documentNumber, apiKey));
     }
 

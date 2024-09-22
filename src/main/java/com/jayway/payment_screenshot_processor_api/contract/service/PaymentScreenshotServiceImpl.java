@@ -1,7 +1,5 @@
 package com.jayway.payment_screenshot_processor_api.contract.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.jayway.payment_screenshot_processor_api.config.ObjectMapperConfig;
 import com.jayway.payment_screenshot_processor_api.contract.dto.PaymentScreenshotProcessor;
 import com.jayway.payment_screenshot_processor_api.contract.dto.request.GetPaymentScreenshotRequest;
 import com.jayway.payment_screenshot_processor_api.contract.dto.response.PaymentScreenshotResponse;
@@ -24,6 +22,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
+import static com.jayway.payment_screenshot_processor_api.constant.Constant.INVALID_FILE;
 import static com.jayway.payment_screenshot_processor_api.constant.Constant.OPERATION_NUMBER_ALREADY_EXISTS;
 import static com.jayway.payment_screenshot_processor_api.util.TesseractUtil.tesseractProcessor;
 
@@ -36,7 +35,7 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
     private final EncryptionUtil encryptionUtil;
 
     @Override
-    public PaymentScreenshotResponse screenshotProcessor(MultipartFile multipartFile, String documentNumber, String apiKey) throws JsonProcessingException {
+    public PaymentScreenshotResponse screenshotProcessor(MultipartFile multipartFile, String documentNumber, String apiKey) {
         encryptionUtil.validateApiKey(apiKey);
         ValidationUtil.ensureIsNotEmpty(documentNumber, "Document number");
         ValidationUtil.ensureIsNotNull(multipartFile, "File");
@@ -44,7 +43,6 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
         FileType.ensureValidExtension(fileExtension);
         InputStream fileConverted = FileUtil.convertMultiPartToInputStream(multipartFile);
         String resultTextImage = tesseractProcessor(fileConverted);
-        log.info("Result Text Image: {}", resultTextImage);
         PaymentScreenshotProcessor processor = PaymentScreenshotProcessor.create(documentNumber);
         ocrMatcherStrategies
                 .forEach(value -> value.apply(resultTextImage, processor));
@@ -54,8 +52,6 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
                 });
         PaymentScreenshotEntity paymentScreenshotEntity = PaymentScreenshotEntity.from(processor);
         paymentScreenshotRepository.save(paymentScreenshotEntity);
-        String processorLog = ObjectMapperConfig.getObjectMapper().writeValueAsString(processor);
-        log.info("Result Processor: {}", processorLog);
         String encryptedResult = encryptionUtil.encrypt(processor);
         return PaymentScreenshotResponse.create(encryptedResult);
     }
@@ -86,6 +82,6 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
                 .map(fileName -> fileName.lastIndexOf("."))
                 .filter(lastDotIndex -> lastDotIndex > 0)
                 .map(lastDotIndex -> originalFilename.substring(lastDotIndex + 1))
-                .orElseThrow(() -> new IllegalArgumentException("El nombre de archivo original no debe ser nulo."));
+                .orElseThrow(() -> GenericClientException.create(INVALID_FILE,HttpStatus.BAD_REQUEST));
     }
 }
