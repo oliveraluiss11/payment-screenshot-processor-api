@@ -4,27 +4,35 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.payment_screenshot_processor_api.config.ObjectMapperConfig;
 import com.jayway.payment_screenshot_processor_api.contract.dto.PaymentScreenshotProcessor;
 import com.jayway.payment_screenshot_processor_api.contract.dto.response.PaymentScreenshotResponse;
+import com.jayway.payment_screenshot_processor_api.contract.entity.PaymentScreenshotEntity;
+import com.jayway.payment_screenshot_processor_api.contract.repository.PaymentScreenshotRepository;
 import com.jayway.payment_screenshot_processor_api.contract.service.ocrmatcherstrategy.OcrMatcherStrategy;
+import com.jayway.payment_screenshot_processor_api.exception.GenericClientException;
 import com.jayway.payment_screenshot_processor_api.type.FileType;
 import com.jayway.payment_screenshot_processor_api.util.FileUtil;
 import com.jayway.payment_screenshot_processor_api.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.jayway.payment_screenshot_processor_api.constant.Constant.ENCRYPTED_RESULT_DEFAULT;
+import static com.jayway.payment_screenshot_processor_api.constant.Constant.OPERATION_NUMBER_ALREADY_EXISTS;
 import static com.jayway.payment_screenshot_processor_api.util.TesseractUtil.tesseractProcessor;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PaymentScreenshotServiceImpl implements PaymentScreenshotService{
+public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
     private final List<OcrMatcherStrategy> ocrMatcherStrategies;
+    private final PaymentScreenshotRepository paymentScreenshotRepository;
+
     @Override
     public PaymentScreenshotResponse screenshotProcessor(MultipartFile multipartFile, String documentNumber) throws JsonProcessingException {
         ValidationUtil.ensureIsNotEmpty(documentNumber, "Document number");
@@ -37,6 +45,12 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService{
         PaymentScreenshotProcessor processor = PaymentScreenshotProcessor.create(documentNumber);
         ocrMatcherStrategies
                 .forEach(value -> value.apply(resultTextImage, processor));
+        paymentScreenshotRepository.findByTransactionNumber(processor.getTransactionNumber())
+                .ifPresent(value -> {
+                    throw new GenericClientException(OPERATION_NUMBER_ALREADY_EXISTS, HttpStatus.UNPROCESSABLE_ENTITY, LocalDateTime.now());
+                });
+        PaymentScreenshotEntity paymentScreenshotEntity = PaymentScreenshotEntity.from(processor);
+        paymentScreenshotRepository.save(paymentScreenshotEntity);
         String processorLog = ObjectMapperConfig.getObjectMapper().writeValueAsString(processor);
         log.info("Result Processor: {}", processorLog);
         return PaymentScreenshotResponse.create(ENCRYPTED_RESULT_DEFAULT);

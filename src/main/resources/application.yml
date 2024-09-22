@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: payment-screenshot-processor-api
+  data:
+    mongodb:
+      uri:  mongodb+srv://oliveraluis11:oliveraluis11@cluster-jayway.8mfmua4.mongodb.net/payment-screenshot-processor?retryWrites=true&w=majority&appName=cluster-jayway
+
+ocr:
+  key: 8H1zboIn/nyx0fudtYKiHw==
