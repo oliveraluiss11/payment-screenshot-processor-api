@@ -7,4 +7,4 @@ COPY target/payment-screenshot-processor-api-0.0.1-SNAPSHOT.jar /app/payment-scr
 WORKDIR /app
 
 # Ejecuta la aplicación al iniciar el contenedor
-CMD ["java", "-jar", "ms-ocr.jar"]
+CMD ["java", "-jar", "payment-screenshot-processor-api.jar"]
