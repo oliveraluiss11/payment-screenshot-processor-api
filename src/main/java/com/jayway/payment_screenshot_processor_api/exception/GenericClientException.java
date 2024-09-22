@@ -1,5 +1,6 @@
 package com.jayway.payment_screenshot_processor_api.exception;
 
+import com.jayway.payment_screenshot_processor_api.util.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,6 @@ public class GenericClientException extends RuntimeException{
         this.registrationDate = registrationDate;
     }
     public static GenericClientException create(String message, HttpStatus httpStatus){
-        return new GenericClientException(message, httpStatus, LocalDateTime.now());
+        return new GenericClientException(message, httpStatus, DateUtil.getLocalDateTime());
     }
 }

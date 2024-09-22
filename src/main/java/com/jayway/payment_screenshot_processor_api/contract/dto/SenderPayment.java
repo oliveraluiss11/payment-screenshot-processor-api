@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class SenderPayment {
+public class SenderPayment implements Serializable {
     private String documentNumber;
     private String wallet;
 

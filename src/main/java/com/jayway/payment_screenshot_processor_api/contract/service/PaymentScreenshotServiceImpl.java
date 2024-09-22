@@ -9,6 +9,7 @@ import com.jayway.payment_screenshot_processor_api.contract.repository.PaymentSc
 import com.jayway.payment_screenshot_processor_api.contract.service.ocrmatcherstrategy.OcrMatcherStrategy;
 import com.jayway.payment_screenshot_processor_api.exception.GenericClientException;
 import com.jayway.payment_screenshot_processor_api.type.FileType;
+import com.jayway.payment_screenshot_processor_api.util.EncryptionUtil;
 import com.jayway.payment_screenshot_processor_api.util.FileUtil;
 import com.jayway.payment_screenshot_processor_api.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.jayway.payment_screenshot_processor_api.constant.Constant.ENCRYPTED_RESULT_DEFAULT;
 import static com.jayway.payment_screenshot_processor_api.constant.Constant.OPERATION_NUMBER_ALREADY_EXISTS;
 import static com.jayway.payment_screenshot_processor_api.util.TesseractUtil.tesseractProcessor;
 
@@ -32,6 +31,7 @@ import static com.jayway.payment_screenshot_processor_api.util.TesseractUtil.tes
 public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
     private final List<OcrMatcherStrategy> ocrMatcherStrategies;
     private final PaymentScreenshotRepository paymentScreenshotRepository;
+    private final EncryptionUtil encryptionUtil;
 
     @Override
     public PaymentScreenshotResponse screenshotProcessor(MultipartFile multipartFile, String documentNumber) throws JsonProcessingException {
@@ -47,14 +47,16 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
                 .forEach(value -> value.apply(resultTextImage, processor));
         paymentScreenshotRepository.findByTransactionNumber(processor.getTransactionNumber())
                 .ifPresent(value -> {
-                    throw new GenericClientException(OPERATION_NUMBER_ALREADY_EXISTS, HttpStatus.UNPROCESSABLE_ENTITY, LocalDateTime.now());
+                    throw GenericClientException.create(OPERATION_NUMBER_ALREADY_EXISTS, HttpStatus.UNPROCESSABLE_ENTITY);
                 });
         PaymentScreenshotEntity paymentScreenshotEntity = PaymentScreenshotEntity.from(processor);
         paymentScreenshotRepository.save(paymentScreenshotEntity);
         String processorLog = ObjectMapperConfig.getObjectMapper().writeValueAsString(processor);
         log.info("Result Processor: {}", processorLog);
-        return PaymentScreenshotResponse.create(ENCRYPTED_RESULT_DEFAULT);
+        String encryptedResult = encryptionUtil.encrypt(processor);
+        return PaymentScreenshotResponse.create(encryptedResult);
     }
+
     private String getFileExtension(MultipartFile file) {
         var originalFilename = file.getOriginalFilename();
         return Optional.ofNullable(originalFilename)

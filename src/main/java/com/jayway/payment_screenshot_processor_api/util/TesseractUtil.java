@@ -22,7 +22,7 @@ public class TesseractUtil {
         try {
             return tesseract.doOCR(file);
         } catch (TesseractException e) {
-            throw new GenericClientException(e.getMessage(), HttpStatus.CONFLICT, DateUtil.getLocalDateTime());
+            throw GenericClientException.create(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
     public static String tesseractProcessor(InputStream inputStream){
@@ -35,7 +35,7 @@ public class TesseractUtil {
             BufferedImage bufferedImage = ImageIO.read(inputStream);
             return tesseract.doOCR(bufferedImage);
         } catch (IOException | TesseractException e) {
-            throw new GenericClientException(e.getMessage(), HttpStatus.CONFLICT, DateUtil.getLocalDateTime());
+            throw GenericClientException.create(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 }

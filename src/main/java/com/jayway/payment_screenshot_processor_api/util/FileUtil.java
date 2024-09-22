@@ -18,7 +18,7 @@ public class FileUtil {
             }
             return convertedFile;
         } catch (IOException exception) {
-            throw new GenericClientException(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, DateUtil.getLocalDateTime());
+            throw GenericClientException.create(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     public static InputStream convertMultiPartToInputStream(MultipartFile file) {
@@ -35,7 +35,7 @@ public class FileUtil {
 
             return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
         } catch (IOException exception) {
-            throw new GenericClientException(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, DateUtil.getLocalDateTime());
+            throw GenericClientException.create(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
