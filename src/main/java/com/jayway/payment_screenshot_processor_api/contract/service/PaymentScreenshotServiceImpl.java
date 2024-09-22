@@ -32,7 +32,7 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService{
         String fileExtension = getFileExtension(multipartFile);
         FileType.ensureValidExtension(fileExtension);
         InputStream fileConverted = FileUtil.convertMultiPartToInputStream(multipartFile);
-        String resultTextImage = tesseractProcessor(fileConverted).replace("\\s*", "").replace("\\n*", "");
+        String resultTextImage = tesseractProcessor(fileConverted);
         log.info("Result Text Image: {}", resultTextImage);
         PaymentScreenshotProcessor processor = PaymentScreenshotProcessor.create(documentNumber);
         ocrMatcherStrategies

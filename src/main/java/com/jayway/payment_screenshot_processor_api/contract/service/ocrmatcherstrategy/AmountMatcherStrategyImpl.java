@@ -26,15 +26,14 @@ public class AmountMatcherStrategyImpl implements OcrMatcherStrategy {
                 .orElse(UNKNOWN);
         List<String> valueList = List.of(result.split("\\s+"));
         BigDecimal amount = BigDecimal.ZERO;
-        String currencyCode = UNKNOWN;
+        String currencyCode;
         int count = valueList.size();
+        currencyCode = PEN_CODE;
         switch (count) {
             case 1:
                 amount = new BigDecimal(valueList.getFirst());
-                currencyCode = PEN_CODE;
                 break;
             case 2:
-                currencyCode = valueList.get(0);
                 amount = new BigDecimal(valueList.get(1));
                 break;
         }

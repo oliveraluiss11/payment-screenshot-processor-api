@@ -25,6 +25,7 @@ public class RecipientCellphoneMatcherStrategyImpl implements OcrMatcherStrategy
             result = result.substring(result.length()-3);
             result = "******"+result;
         }
+        result = result.replace(" ", "");
         processor.getRecipient().setCellphone(result);
     }
 }
