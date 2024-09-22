@@ -13,14 +13,17 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Optional;
+
+import static com.jayway.payment_screenshot_processor_api.constant.Constant.INVALID_API_KEY;
 
 @Component
 @RequiredArgsConstructor
 public class EncryptionUtil {
     public static final String AES = "AES";
     public static final String OCR_KEY = "ocr.key";
+    public static final String API_KEY = "api.key";
     private final Environment environment;
 
     public String encrypt(PaymentScreenshotProcessor processor) {
@@ -42,15 +45,27 @@ public class EncryptionUtil {
         }
     }
 
-    public PaymentScreenshotProcessor decrypt(String encryptedText) throws Exception {
-        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
-        Cipher cipher = Cipher.getInstance(AES);
-        cipher.init(Cipher.DECRYPT_MODE, getSecretKey());
-        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(decryptedBytes);
-        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-        PaymentScreenshotEntity paymentScreenshotEntity = (PaymentScreenshotEntity) objectInputStream.readObject();
-        return PaymentScreenshotProcessor.from(paymentScreenshotEntity);
+    public PaymentScreenshotProcessor decrypt(String encryptedText) {
+        try {
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
+            Cipher cipher = Cipher.getInstance(AES);
+            cipher.init(Cipher.DECRYPT_MODE, getSecretKey());
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(decryptedBytes);
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            return (PaymentScreenshotProcessor) objectInputStream.readObject();
+        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException |
+                 BadPaddingException | InvalidKeyException | ClassNotFoundException e) {
+            throw GenericClientException.create(e.getMessage(), HttpStatus.CONFLICT);
+        }
+
+    }
+
+    public void validateApiKey(String apiKey) {
+        String apiKeyEnvironment = environment.getProperty(API_KEY);
+        Optional.ofNullable(apiKey)
+                .filter(value -> value.equals(apiKeyEnvironment))
+                .orElseThrow(() -> GenericClientException.create(INVALID_API_KEY, HttpStatus.UNAUTHORIZED));
     }
 
     private SecretKey getSecretKey() {

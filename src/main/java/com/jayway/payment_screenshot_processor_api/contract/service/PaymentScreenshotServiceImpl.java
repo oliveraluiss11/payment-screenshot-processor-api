@@ -3,7 +3,9 @@ package com.jayway.payment_screenshot_processor_api.contract.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.payment_screenshot_processor_api.config.ObjectMapperConfig;
 import com.jayway.payment_screenshot_processor_api.contract.dto.PaymentScreenshotProcessor;
+import com.jayway.payment_screenshot_processor_api.contract.dto.request.GetPaymentScreenshotRequest;
 import com.jayway.payment_screenshot_processor_api.contract.dto.response.PaymentScreenshotResponse;
+import com.jayway.payment_screenshot_processor_api.contract.dto.response.PaymentScreenshotResponseList;
 import com.jayway.payment_screenshot_processor_api.contract.entity.PaymentScreenshotEntity;
 import com.jayway.payment_screenshot_processor_api.contract.repository.PaymentScreenshotRepository;
 import com.jayway.payment_screenshot_processor_api.contract.service.ocrmatcherstrategy.OcrMatcherStrategy;
@@ -34,7 +36,8 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
     private final EncryptionUtil encryptionUtil;
 
     @Override
-    public PaymentScreenshotResponse screenshotProcessor(MultipartFile multipartFile, String documentNumber) throws JsonProcessingException {
+    public PaymentScreenshotResponse screenshotProcessor(MultipartFile multipartFile, String documentNumber, String apiKey) throws JsonProcessingException {
+        encryptionUtil.validateApiKey(apiKey);
         ValidationUtil.ensureIsNotEmpty(documentNumber, "Document number");
         ValidationUtil.ensureIsNotNull(multipartFile, "File");
         String fileExtension = getFileExtension(multipartFile);
@@ -55,6 +58,26 @@ public class PaymentScreenshotServiceImpl implements PaymentScreenshotService {
         log.info("Result Processor: {}", processorLog);
         String encryptedResult = encryptionUtil.encrypt(processor);
         return PaymentScreenshotResponse.create(encryptedResult);
+    }
+
+    @Override
+    public PaymentScreenshotResponseList getScreenshotProcessedList(String apiKey) {
+        encryptionUtil.validateApiKey(apiKey);
+        List<PaymentScreenshotEntity> entities = paymentScreenshotRepository.findAll();
+        List<PaymentScreenshotResponse> processors = entities
+                .stream()
+                .map(PaymentScreenshotProcessor::from)
+                .map(encryptionUtil::encrypt)
+                .map(PaymentScreenshotResponse::create)
+                .toList();
+        return PaymentScreenshotResponseList.create(processors);
+    }
+
+    @Override
+    public PaymentScreenshotProcessor getPaymentScreenshotByEncryptedValue(GetPaymentScreenshotRequest request, String apiKey) {
+        encryptionUtil.validateApiKey(apiKey);
+        request.ensureAttributes();
+        return encryptionUtil.decrypt(request.getEncryptedPaymentScreenshot());
     }
 
     private String getFileExtension(MultipartFile file) {

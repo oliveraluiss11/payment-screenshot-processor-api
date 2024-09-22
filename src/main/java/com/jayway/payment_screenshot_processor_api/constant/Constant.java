@@ -12,5 +12,6 @@ public class Constant {
     public static final String PEN_CODE = "PEN";
     public static final String ENCRYPTED_RESULT_DEFAULT = "2b7e151628aed2a6abf7158809cf4f3c";
     public static final String OPERATION_NUMBER_ALREADY_EXISTS = "Operation number already exists";
+    public static final String INVALID_API_KEY = "Invalid Api Key";
 
 }
