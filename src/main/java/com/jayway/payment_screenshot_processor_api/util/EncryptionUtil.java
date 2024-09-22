@@ -1,7 +1,6 @@
 package com.jayway.payment_screenshot_processor_api.util;
 
 import com.jayway.payment_screenshot_processor_api.contract.dto.PaymentScreenshotProcessor;
-import com.jayway.payment_screenshot_processor_api.contract.entity.PaymentScreenshotEntity;
 import com.jayway.payment_screenshot_processor_api.exception.GenericClientException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
