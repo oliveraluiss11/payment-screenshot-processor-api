@@ -3,10 +3,13 @@ package com.jayway.payment_screenshot_processor_api.contract.service.ocrmatchers
 import com.jayway.payment_screenshot_processor_api.contract.dto.PaymentScreenshotProcessor;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.jayway.payment_screenshot_processor_api.constant.Constant.EMPTY;
 import static com.jayway.payment_screenshot_processor_api.constant.Constant.UNKNOWN;
 
 @Component
@@ -21,7 +24,12 @@ public class RecipientWalletMatcherStrategyImpl implements OcrMatcherStrategy {
                 .filter(Matcher::find)
                 .map(Matcher::group)
                 .orElse(UNKNOWN);
-        result = result.split("\\s")[1];
+        List<String> resultList = Arrays.asList(result.split("\\s"));
+        result = resultList.stream()
+                .filter(value -> !EMPTY.equals(value))
+                .filter(value -> !"Destino:".equals(value))
+                .findFirst()
+                .orElse(UNKNOWN);
         result = result.toUpperCase();
         processor.getRecipient().setWallet(result);
     }
