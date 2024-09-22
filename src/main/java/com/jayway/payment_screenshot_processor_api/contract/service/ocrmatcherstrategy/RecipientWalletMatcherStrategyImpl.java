@@ -21,6 +21,8 @@ public class RecipientWalletMatcherStrategyImpl implements OcrMatcherStrategy {
                 .filter(Matcher::find)
                 .map(Matcher::group)
                 .orElse(UNKNOWN);
+        result = result.split("\\s")[1];
+        result = result.toUpperCase();
         processor.getRecipient().setWallet(result);
     }
 }
