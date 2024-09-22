@@ -14,10 +14,10 @@ import static com.jayway.payment_screenshot_processor_api.constant.Constant.UNKN
 
 @Component
 public class RecipientWalletMatcherStrategyImpl implements OcrMatcherStrategy {
-    private final String REGEX = "Destino:\\s*\\n*\\s*(\\w+)";
 
     @Override
     public void apply(String text, PaymentScreenshotProcessor processor) {
+        String REGEX = "Destino:\\s*\\n*\\s*(\\w+)";
         Pattern pattern = Pattern.compile(REGEX);
         Matcher matcher = pattern.matcher(text);
         String result = Optional.of(matcher)

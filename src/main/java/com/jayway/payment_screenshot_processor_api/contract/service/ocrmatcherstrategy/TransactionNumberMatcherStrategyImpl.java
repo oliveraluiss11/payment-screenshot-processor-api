@@ -11,10 +11,10 @@ import static com.jayway.payment_screenshot_processor_api.constant.Constant.UNKN
 
 @Component
 public class TransactionNumberMatcherStrategyImpl implements OcrMatcherStrategy {
-    private final String REGEX = "\\b\\d{8}\\b";
 
     @Override
     public void apply(String text, PaymentScreenshotProcessor processor) {
+        String REGEX = "\\b\\d{8}\\b";
         Pattern pattern = Pattern.compile(REGEX);
         Matcher matcher = pattern.matcher(text);
         String result = Optional.of(matcher)

@@ -10,17 +10,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 public class FileUtil {
-    public static File convertMultiPartToFile(MultipartFile file) {
-        try {
-            File convertedFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-            try (var inputStream = file.getInputStream()) {
-                Files.copy(inputStream, convertedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-            return convertedFile;
-        } catch (IOException exception) {
-            throw GenericClientException.create(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
     public static InputStream convertMultiPartToInputStream(MultipartFile file) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

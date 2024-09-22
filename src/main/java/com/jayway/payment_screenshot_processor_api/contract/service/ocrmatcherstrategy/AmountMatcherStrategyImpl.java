@@ -14,10 +14,10 @@ import static com.jayway.payment_screenshot_processor_api.constant.Constant.UNKN
 
 @Component
 public class AmountMatcherStrategyImpl implements OcrMatcherStrategy {
-    private final String REGEX = "S/\\s*\\d+\\.\\d{2}|\\d+";
 
     @Override
     public void apply(String text, PaymentScreenshotProcessor processor) {
+        String REGEX = "S/\\s*\\d+\\.\\d{2}|\\d+";
         Pattern pattern = Pattern.compile(REGEX);
         Matcher matcher = pattern.matcher(text);
         String result = Optional.of(matcher)
@@ -29,14 +29,11 @@ public class AmountMatcherStrategyImpl implements OcrMatcherStrategy {
         String currencyCode;
         int count = valueList.size();
         currencyCode = PEN_CODE;
-        switch (count) {
-            case 1:
-                amount = new BigDecimal(valueList.getFirst());
-                break;
-            case 2:
-                amount = new BigDecimal(valueList.get(1));
-                break;
-        }
+        amount = switch (count) {
+            case 1 -> new BigDecimal(valueList.getFirst());
+            case 2 -> new BigDecimal(valueList.get(1));
+            default -> amount;
+        };
         processor.setAmount(amount);
         processor.setCurrencyCode(currencyCode);
     }

@@ -11,10 +11,10 @@ import static com.jayway.payment_screenshot_processor_api.constant.Constant.UNKN
 
 @Component
 public class RecipientCellphoneMatcherStrategyImpl implements OcrMatcherStrategy {
-    private final String REGEX = "[0-9*]{3}\\s+[0-9*]{3}\\s+[0-9*]{3}|(?:ARRE|\\*)\\s*(\\d{3})";
 
     @Override
     public void apply(String text, PaymentScreenshotProcessor processor) {
+        String REGEX = "[0-9*]{3}\\s+[0-9*]{3}\\s+[0-9*]{3}|(?:ARRE|\\*)\\s*(\\d{3})";
         Pattern pattern = Pattern.compile(REGEX);
         Matcher matcher = pattern.matcher(text);
         String result = Optional.of(matcher)
